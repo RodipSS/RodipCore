@@ -1,8 +1,10 @@
 [org 0x7c00]
 [BITS 16]
 mov si, msg
-;PRINTING
-
+mov ah, 0x00
+mov al, 0x03
+int 0x10
+; PRINTING
 listen:
     lodsb
     mov ah, 0x0e
@@ -10,26 +12,24 @@ listen:
     cmp al, 0
     je kernel
     jmp listen
-print_String:
-    msg db "Hello World! (from bootloader btw)", 0Ah, 0Dh, 0
 
-;LOADING KERNEL
-xor ax, ax
+msg db "Hello World! (from bootloader btw)", 0Dh, 0Ah, 0
+; LOADING KERNEL
+mov ax, 0x1000
 kernel:
-
     mov si, 0
     mov ah, 0x02
-    mov al, 8
+    mov al, 2 ; increase if kernel size > 2 sectors - 1 sector = 512 bytes
     mov ch, 0
     mov cl, 2
     mov dh, 0
-    mov dl, 0x80
+    mov dl, 0x00
     mov bx, 0x1000
     mov es, ax
     int 0x13
-    jc disk_error
+jc disk_error
 
-;TRYING SOMETHING NAMED LIKE "PROTECTED MODE'
+; TRYING SOMETHING NAMED LIKE "PROTECTED MODE'
 gdt_start:
 gdt_null: dd 0,0
 gdt_code: dw 0xffff
@@ -44,20 +44,33 @@ gdt_data: dw 0xffff
             db 10010010b
             db 11001111b
             db 0
+
 gdt_end:
-gdt_descryptor: 
+gdt_descriptor: 
     dw gdt_end - gdt_start - 1
     dd gdt_start
-;LET'S GO IN PROTECTED MODE
+
+; LET'S GO IN PROTECTED MODE
+;###################################
+; let's play in a game, rock paper scissors
+; i pick rock
+; i pick scissors
+; ah i lost :(
+; okay let's try again later...
+;###################################
+
+next:
     cli
-    lgdt [gdt_descryptor]
+    lgdt [gdt_descriptor]
     mov eax, cr0
     or eax, 1
     mov cr0, eax
-    jmp 08h:protected_mode
-;PROTECTED MODE
+    jmp 0x08:protected_mode
+
+; PROTECTED MODE
+
 [BITS 32]
-mov ebx, 0x1000
+
 protected_mode:
     mov ax, 10h
     mov ds, ax
@@ -66,10 +79,23 @@ protected_mode:
     mov gs, ax
     mov ss, ax
     mov esp, 0x90000
-    jmp 0x1000
-.halt: jmp .halt
+    jmp 0x08:0x10000
+
+halt:
+    jmp halt
+
 disk_error:
     mov si, disk_msg
-disk_msg db "Oh no! Disk Error!! :(", 0Ah, 0Dh, 0
+
+disk_loop:
+    lodsb
+    mov ah, 0x0e
+    int 0x10
+    cmp al, 0
+    je halt
+    jmp disk_loop
+
+disk_msg db "Oh no! Disk Error!! :(", 0
+
 times 510-($-$$) db 0
 dw 0xAA55
