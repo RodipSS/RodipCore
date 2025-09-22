@@ -23,8 +23,8 @@ kernel:
     mov ch, 0
     mov cl, 2
     mov dh, 0
-    mov dl, 0x00
-    mov bx, 0x1000
+    mov dl, 0x80
+    mov bx, 0x0000   ; исправлено: теперь ядро грузится по 0x10000
     mov es, ax
     int 0x13
 jc disk_error
