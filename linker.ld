@@ -1,4 +1,5 @@
 ENTRY(kmain)
+
 SECTIONS
 {
   . = 0x10000;
