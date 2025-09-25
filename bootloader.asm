@@ -86,11 +86,11 @@ kernel_start:
     mov ds, ax
     mov es, ax
 
-    mov dword [0xB8000], 'H' | 0x07 << 8
-    mov dword [0xB8004], 'E' | 0x07 << 8
-    mov dword [0xB8008], 'L' | 0x07 << 8 ; H E L L O for some tests
-    mov dword [0xB800C], 'L' | 0x07 << 8
-    mov dword [0xB8010], 'O' | 0x07 << 8
+   ; mov dword [0xB8000], 'H' | 0x07 << 8
+   ; mov dword [0xB8004], 'E' | 0x07 << 8
+   ; mov dword [0xB8008], 'L' | 0x07 << 8 ; H E L L O for some tests
+   ; mov dword [0xB800C], 'L' | 0x07 << 8
+   ; mov dword [0xB8010], 'O' | 0x07 << 8
     jmp protected_mode
 protected_mode:
     mov ax, 10h
